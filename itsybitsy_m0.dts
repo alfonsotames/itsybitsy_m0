@@ -1,0 +1,131 @@
+/*
+ * Copyright (c) 2018 Bryan O'Donoghue
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <atmel/samd21.dtsi>
+
+/ {
+	model = "ItsyBitsy M0";
+	compatible = "atsamd21,itsybitsy_m0", "atmel,samd21j18a", "atmel,samd21";
+
+	chosen {
+		zephyr,console = &sercom0;
+		zephyr,shell-uart = &sercom0;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	/* These aliases are provided for compatibility with samples */
+	aliases {
+                sw0 = &button0;
+		led0 = &led0;
+                pwm-led0 = &pwm_led0;
+                pwm-buzzer0 = &pwm_buzzer0;
+		i2c-0 = &sercom5;
+                spi-0 = &sercom4;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led_0 {
+			gpios = <&porta 17 GPIO_ACTIVE_LOW>;
+			label = "Red LED";
+		};
+	};
+
+        pwmleds {
+		compatible = "pwm-leds";
+
+		pwm_led0: pwm_led_0 {
+			pwms = <&tcc2 1>;
+		};
+	};
+        
+        buzzers {
+                compatible = "pwm-leds";
+                pwm_buzzer0: pwm_buzzer_0 {
+                    pwms = <&tcc0 3>;
+                };
+        };
+
+        buttons {
+                compatible = "gpio-keys";
+                button0: button_0 {
+                    gpios = < &porta 9 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+                    label = "User button";
+                };
+             /* ... other buttons ... */
+        };
+
+};
+
+&cpu0 {
+	clock-frequency = <48000000>;
+};
+
+
+&tcc0 {
+	status = "okay";
+	compatible = "atmel,sam0-tcc-pwm";
+	/* Gives a maximum period of 1.4 s */
+	prescaler = <1024>;
+	#pwm-cells = <1>;
+};
+
+&tcc2 {
+	status = "okay";
+	compatible = "atmel,sam0-tcc-pwm";
+	/* Gives a maximum period of 1.4 s */
+	prescaler = <1024>;
+	#pwm-cells = <1>;
+};
+
+&sercom0 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <115200>;
+	rxpo = <3>;
+	txpo = <1>;
+};
+
+
+
+&sercom4 {
+	status = "okay";
+	compatible = "atmel,sam0-spi";
+	dipo = <0>;
+	dopo = <1>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+        cs-gpios = <&porta 18 GPIO_ACTIVE_LOW>;
+        ili9163@0 {
+            status = "okay";
+            label = "ILI9163";
+            spi-max-frequency = <20000000>;
+            reg = <0>;
+            compatible = "ilitek,ili9163";
+            cmd-data-gpios=<&porta 7 GPIO_ACTIVE_HIGH>;
+        };
+};
+
+// USB
+
+
+
+&sercom5 {
+	status = "okay";
+	compatible = "atmel,sam0-i2c";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+
+
+
+
+&usb0 {
+	status = "okay";
+};
